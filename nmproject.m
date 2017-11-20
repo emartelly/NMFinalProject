@@ -105,4 +105,4 @@ for i=3:N-2
     end
 end
 
-M = ((p*Le)/420)*M;
+K = (EI/Le^3)*K;
