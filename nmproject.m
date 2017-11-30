@@ -1,11 +1,12 @@
 clear all
+% THIS SOLVES A FIXED FIXED BEAM PROBLEM
 %% Constants
 %%% Constant Definitions
-n = 3; %number of nodes
-L = 3; %beam length
+n = 8; %number of nodes
+L = 1; %beam length
 Le = L/n;% element length
-EI = 1; %Young's Modulus and Moment of Inertia for beam
-p = 1; % Density 
+EI = 10000; %Young's Modulus and Moment of Inertia for beam
+p = 100; % Density 
 
 %% Mass Matrix
 %Populate Mass Matrix
@@ -106,3 +107,23 @@ for i=3:N-2
 end
 
 K = (EI/Le^3)*K;
+
+%%%%%%% could add force vector at this point, that would require a
+%%%%%%% different method of solving (not using eig)
+
+%% Reduce by removing known node displacements
+
+% Remove first/last row and first/last column to account for fixed ends
+K = K([3:end-2],[3:end-2]);
+% Remove first/last row and first/last column to account for fixed ends
+M = M([3:end-2],[3:end-2]);
+
+%% Solve the eigenvalue problem
+[V,D] = eig(K,M);
+
+%% Plot first mode shape
+x = 0:Le:L;
+disp = vertcat(0,V(1:2:end,1),0); %displacement zeros added to account for BCs
+angle = vertcat(0,V(2:2:end,1),0); %angle
+
+plot(x,disp);
