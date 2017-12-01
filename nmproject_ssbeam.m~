@@ -1,8 +1,8 @@
 clear all
-% THIS SOLVES A FIXED FIXED BEAM PROBLEM WITH NO INPUT FORCE
+% THIS SOLVES A SIMPLY SUPPORTED BEAM PROBLEM
 %% Constants
 %%% Constant Definitions
-n = 30; %number of nodes
+n = 8; %number of nodes
 L = 1; %beam length
 Le = L/n;% element length
 EI = 10000; %Young's Modulus and Moment of Inertia for beam
@@ -108,22 +108,30 @@ end
 
 K = (EI/Le^3)*K;
 
-%%%%%%% could add force vector at this point, that would require a
-%%%%%%% different method of solving (not using eig)
-
+%% Force Vector
+F = [0; 16; 0; 0]; %temporary force vector
+F = vertcat(F,zeros(12,1));
 %% Reduce by removing known node displacements
 
-% Remove first/last  2 rows and first/last column to account for fixed ends
-K = K([3:end-2],[3:end-2]);
+% Remove first row/col and second to last row/col
+K = K([2:end-2,end],[2:end-2,end]);
 
-M = M([3:end-2],[3:end-2]);
+M = M([2:end-2,end],[2:end-2,end]);
 
-%% Solve the eigenvalue problem
-[V,D] = eig(K,M);
+%% Solve the static problem.
+% Solve static problem (set acceleration to zero)
+u = K\F;
 
-%% Plot first mode shape
+% Plot
 x = 0:Le:L;
-disp = vertcat(0,V(1:2:end,1),0); %displacement zeros added to account for BCs
-angle = vertcat(0,V(2:2:end,1),0); %angle
-
+disp = vertcat(0,u(2:2:end-1),0);
 plot(x,disp);
+
+% %% Convert second order ODE ([M]q'' + [K]q = P) to set of first order ODEs
+% [r,c] = size(M);
+% 
+% M_1 = vertcat(horzcat(zeros(r),M),horzcat(eye(r),zeros(r)));
+% K_1 = vertcat(horzcat(K,zeros(r)),horzcat(zeros(r),eye(r)));
+% F_1 = vertcat(F,zeros(r,1));
+
+
