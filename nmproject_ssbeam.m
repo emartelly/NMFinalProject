@@ -3,7 +3,7 @@ clear all
 % THIS SOLVES A SIMPLY SUPPORTED BEAM PROBLEM
 %% Constants
 %%% Constant Definitions
-n = 1; %number of nodes
+n = 2; %number of nodes
 L = 1; %beam length
 Le = L/n;% element length
 EI = 10000; %Young's Modulus and Moment of Inertia for beam
@@ -110,7 +110,7 @@ end
 K = (EI/Le^3)*K;
 
 %% Force Vector
-F = [0; 16]; %temporary force vector
+F = [0; 16; 0; 0]; %temporary force vector
 
 %% Reduce by removing known node displacements
 
@@ -126,37 +126,30 @@ M = M([2:end-2,end],[2:end-2,end]);
 
 %% Solve the static problem
 u = K\F;
-u = vertcat(0,u(1),0,u(2));
+u = vertcat(0,u(1:end-1),0,u(end));
 
 % Plot
 x = 0:Le:L;
 s = 0:0.1:1;
 
 % Use shape functions to find deflection of entire beam
-N1 = 1 - 3*(s/Le).^2 + 2*(s/Le).^3;
-N2 = Le *(s/Le).*((s/Le)-1).^2;
-N3 = ((s/Le).^2).*(3-2*(s/Le));
-N4 = Le*((s/Le).^2).*((s/Le)-1);
+% N1 = 1 - 3*(s/Le).^2 + 2*(s/Le).^3;
+% N2 = Le *(s/Le).*((s/Le)-1).^2;
+% N3 = ((s/Le).^2).*(3-2*(s/Le));
+% N4 = Le*((s/Le).^2).*((s/Le)-1);
 
-w1 = N3*u(3) + N4*u(4);
-% w2 = N1*u(3) + N2*u(4) + N3*u(5) + N4*u(6);
-% w3 = N1*u(5) + N2*u(6) + N3*u(7) + N4*u(8);
-% w4 = N1*u(7) + N2*u(8) ;
+N1 = (Le^3 - 2*Le*s.^2 + s.^3)/(Le^3);
+N2 = (Le^2*s - 2*Le*s.^2 + s.^3)/(Le^2);
+N3 = (3*Le*s.^2 - 2*s.^3)/(Le^3);
+N4 = (s.^3 - Le*s.^2)/(Le^2);
 
-% hold on
-plot(linspace(0,1,length(s)),w1);
-% plot(linspace(0.25,0.5,length(s)),w2);
-% plot(linspace(0.5,0.75,length(s)),w3);
-% plot(linspace(0.75,1,length(s)),w4);
-
-
-% j = 1;
-% for i = 1:2:length(x)
-%     w = N1*u(i)+N2*u(i+1)+N3*u(i+2)+N4*u(i+3);
-%     plot((s+j)/4*n,w);
-%     j = j+1;
-%     hold on
-% end
+j = 0;
+for i = 1:2:length(x)
+    w = N1*u(i)+N2*u(i+1)+N3*u(i+2)+N4*u(i+3);
+    plot((s+j)/n,w);
+    j = j+1;
+    hold on
+end
 
 
 
